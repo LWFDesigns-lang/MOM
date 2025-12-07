@@ -1,0 +1,57 @@
+{
+  "metadata": {
+    "description": "Base production costs for POD products (USD)",
+    "last_updated": "2025-12-07",
+    "source": "Industry standard POD pricing",
+    "currency": "USD"
+  },
+  "products": {
+    "t-shirt": {
+      "base_cost": 12.00,
+      "recommended_markup": 2.0,
+      "min_margin_percent": 40,
+      "notes": "Standard unisex cotton tee"
+    },
+    "hoodie": {
+      "base_cost": 25.00,
+      "recommended_markup": 1.8,
+      "min_margin_percent": 35,
+      "notes": "Standard pullover hoodie"
+    },
+    "mug": {
+      "base_cost": 8.00,
+      "recommended_markup": 2.5,
+      "min_margin_percent": 50,
+      "notes": "11oz ceramic mug"
+    },
+    "poster": {
+      "base_cost": 10.00,
+      "recommended_markup": 2.2,
+      "min_margin_percent": 45,
+      "notes": "Standard paper poster"
+    },
+    "sticker": {
+      "base_cost": 3.00,
+      "recommended_markup": 3.0,
+      "min_margin_percent": 60,
+      "notes": "Die-cut vinyl sticker"
+    },
+    "tote-bag": {
+      "base_cost": 15.00,
+      "recommended_markup": 2.0,
+      "min_margin_percent": 40,
+      "notes": "Canvas tote bag"
+    }
+  },
+  "platform_fees": {
+    "etsy": {
+      "transaction_fee_percent": 6.5,
+      "payment_processing_percent": 3.0,
+      "payment_processing_fixed": 0.25,
+      "offsite_ads_percent": 15.0,
+      "listing_fee": 0.20,
+      "total_percent_estimate": 22.5,
+      "notes": "Worst-case scenario for shops under $10K GMV"
+    }
+  }
+}

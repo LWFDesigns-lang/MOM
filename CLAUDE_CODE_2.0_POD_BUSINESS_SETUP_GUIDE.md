@@ -871,10 +871,15 @@ js-yaml .claude/config/token-budgets.yaml
 
 ---
 
+<!-- EXTRACTED: Niche validation logic -> .claude/skills/pod-research/scripts/validate.py -->
+<!-- EXTRACTED: Pricing calculations -> .claude/skills/pod-pricing/scripts/pricing.py -->
+<!-- EXTRACTED: Pricing data -> .claude/skills/pod-pricing/data/base-costs.json -->
+<!-- EXTRACTED: Design guidelines -> .claude/skills/pod-design-review/prompts/style-guide.md -->
+
 ## 5. Phase 1: Core Skills Implementation
 
-**Duration:** Days 2-3 (4-6 hours)  
-**Goal:** Implement 5 core skills with deterministic validation scripts  
+**Duration:** Days 2-3 (4-6 hours)
+**Goal:** Implement 5 core skills with deterministic validation scripts
 **Prerequisites:** Phase 0 complete, Python 3.11+ installed
 
 ### 5.1 Skill Implementation Overview
