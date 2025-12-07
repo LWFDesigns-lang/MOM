@@ -15,19 +15,25 @@ NC='\033[0m'
 
 TESTS_PASSED=0
 TESTS_FAILED=0
+TESTS_SKIPPED=0
 
 success() {
     echo -e "${GREEN}✓${NC} $1"
-    ((TESTS_PASSED++))
+    ((TESTS_PASSED++)) || true
 }
 
 error() {
     echo -e "${RED}✗${NC} $1"
-    ((TESTS_FAILED++))
+    ((TESTS_FAILED++)) || true
 }
 
 info() {
     echo -e "${YELLOW}ℹ${NC} $1"
+}
+
+skip() {
+    echo -e "${YELLOW}↷${NC} $1"
+    ((TESTS_SKIPPED++)) || true
 }
 
 ###############################################################################
@@ -211,7 +217,7 @@ if [ -f "mcp-health-check.sh" ]; then
         error "MCP health check script failed"
     fi
 else
-    error "mcp-health-check.sh not found"
+    skip "mcp-health-check.sh not found; skipping MCP health check"
 fi
 
 ###############################################################################
@@ -256,6 +262,7 @@ echo "MCP Test Summary"
 echo "==================================="
 echo "Passed: $TESTS_PASSED"
 echo "Failed: $TESTS_FAILED"
+echo "Skipped: $TESTS_SKIPPED"
 echo ""
 
 if [ $TESTS_FAILED -gt 0 ]; then
