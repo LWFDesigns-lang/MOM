@@ -108,60 +108,6 @@
       },
       "notes": "Custom fat MCP for deterministic validation (stubbed)."
     },
-    "qdrant-vector-memory": {
-      "command": "docker",
-      "args": [
-        "run",
-        "--rm",
-        "-i",
-        "--name",
-        "qdrant-pod",
-        "-p",
-        "127.0.0.1:6333:6333",
-        "-v",
-        "qdrant-pod-storage:/qdrant/storage",
-        "-e",
-        "QDRANT_API_KEY=${QDRANT_API_KEY}",
-        "-e",
-        "QDRANT_READONLY_KEY=${QDRANT_READONLY_KEY}",
-        "qdrant/qdrant:v1.7.0"
-      ],
-      "security": {
-        "network": "localhost_only",
-        "api_key_required": true,
-        "storage_persistent": true,
-        "spec_version": "2.0",
-        "tier": "tier_2_verified",
-        "localhost_binding": "127.0.0.1"
-      },
-      "notes": "Docker service bound to 127.0.0.1 only (SEP-986)."
-    },
-    "neo4j-relationship-graph": {
-      "command": "docker",
-      "args": [
-        "run",
-        "--rm",
-        "-i",
-        "--name",
-        "neo4j-pod",
-        "-p",
-        "127.0.0.1:7687:7687",
-        "-v",
-        "neo4j-pod-data:/var/lib/neo4j/data",
-        "-e",
-        "NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}",
-        "neo4j:5.15.0"
-      ],
-      "security": {
-        "network": "localhost_only",
-        "password_required": true,
-        "storage_persistent": true,
-        "spec_version": "2.0",
-        "tier": "tier_2_verified",
-        "localhost_binding": "127.0.0.1"
-      },
-      "notes": "Graph database restricted to localhost (Docker) to satisfy air-gap compliance."
-    },
     "etsy-api-integration": {
       "command": "node",
       "args": [
@@ -221,10 +167,6 @@
         }
       ]
     },
-    "docker_localhost_services": [
-      "qdrant-vector-memory",
-      "neo4j-relationship-graph"
-    ],
     "notes": "AWS Secrets Manager + Astrix security audit demanded zero static keys, hourly rotation, and audit trails."
   }
 }

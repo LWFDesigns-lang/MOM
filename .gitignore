@@ -89,3 +89,6 @@ jspm_packages/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Archived documentation
+_archive/

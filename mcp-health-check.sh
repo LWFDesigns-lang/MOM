@@ -59,15 +59,6 @@ check_node_bin() {
   fi
 }
 
-check_docker_container() {
-  local name="$1"
-  if docker ps --format '{{.Names}}' | grep -q "^${name}$"; then
-    status "$GREEN" "✓ Docker container ${name} running (localhost binding enforced)"
-  else
-    status "$RED" "✗ Docker container ${name} not running. Start it via docker-compose up ${name} or docker run (see docker-compose.yml)."
-  fi
-}
-
 printf "\n==== MCP HEALTH CHECK ====\n"
 check_file ".mcp.json"
 check_json ".mcp.json"
@@ -90,14 +81,8 @@ for server in "${!binary_map[@]}"; do
   check_node_bin "$server" "${binary_map[$server]}"
 done
 
-printf "\n==== Docker health ====\n"
-check_docker_container "qdrant-pod"
-check_docker_container "neo4j-pod"
-
-
 printf "\n==== Troubleshooting hints ====\n"
 status "$YELLOW" "• Missing binary → run: npm install @anthropic-ai/mcp-server-filesystem @anthropic-ai/mcp-server-brave-search perplexity-mcp @anthropic-ai/mcp-server-playwright etsy-mcp shopify-mcp"
-status "$YELLOW" "• Docker container kept down? Run 'docker-compose up -d'."
 status "$YELLOW" "• Validation failing? Ensure environment variables are set correctly in .env."
 status "$YELLOW" "• Windows/PowerShell: use Git Bash or WSL to run this script; alternatives include 'bash mcp-health-check.sh'."
 
