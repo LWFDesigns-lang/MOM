@@ -8,140 +8,89 @@ You are a POD (Print on Demand) business analyst agent for LWF Designs and Touge
 
 ## System Architecture
 
-This is a **Lean Agent MVP** - minimal infrastructure, maximum automation:
+This is a **Lean Agent MVP** with minimal infrastructure and maximum automation:
 
 - **No Docker containers** - All tools run as local processes
 - **No cloud services** - No AWS, no external databases
-- **No vector/graph databases** - History stored in local JSON files
 - **File-based persistence** - All data in `.claude/memories/` and `.claude/data/`
-- **MCP 2.0 protocol** - Five MCP servers: filesystem, brave-search, perplexity, logic-validator, data-etsy, data-trends
+- **MCP 2.0 protocol** - Custom MCP servers for logic validation, Etsy data, and trends analysis
 
 ### Core Components
 
 ```
 .claude/
 ├── skills/                 # Five specialized skills (research, design, pricing, SEO, memory)
-├── mcp-servers/           # Custom logic-validator MCP server (Node.js)
+│   └── {skill-name}/
+│       ├── SKILL.md       # Skill definition and execution flow
+│       ├── scripts/       # Python/JS automation scripts
+│       └── prompts/       # Template files for LLM-generated content
+├── mcp-servers/           # Custom Node.js MCP servers
+│   ├── logic-validator/   # Wraps Python validation and pricing scripts
+│   ├── data-etsy/         # 4-tier fallback system for Etsy data
+│   └── data-trends/       # Google Trends API integration
 ├── memories/              # Brand voice, history, validated niches (JSON/MD)
-├── scripts/               # Utility scripts for monitoring and maintenance
 ├── config/                # Fallback strategies, checkpoint configs
-├── data/                  # Logs, skipped niches, runtime data
-└── hooks/                 # Post-skill-complete automation hooks
+└── data/                  # Logs, skipped niches, runtime data
 ```
+
+### MCP Server Architecture
+
+All custom MCP servers implement MCP 2.0 (protocol version `2024-11-05`) using stdio transport with JSON-RPC 2.0. Key features:
+
+- **Circuit breaker pattern** - Automatic failure detection and retry avoidance
+- **Multi-tier fallback** - Graceful degradation across data sources
+- **File-based caching** - Reduces API calls and costs
+- **Debug mode** - Set `DEBUG_MCP=1` for detailed stderr logging
 
 ## Available MCP Tools
 
-### Logic Validator Tools (Primary Interface)
+### Logic Validator Tools
 
-These tools are exposed via the `logic-validator` MCP server and should be your primary interface:
+Primary interface for business logic (wraps Python scripts):
 
-- **`validate_niche`** - Validates POD niche against business viability thresholds
+- **`mcp__logic-validator__validate_niche`** - Validates POD niche against viability thresholds
   - Input: `niche` (string), `etsy_count` (int), `trend_score` (0-1 float)
   - Returns: GO/SKIP decision with confidence level
-  - Calls: `.claude/skills/pod-research/scripts/validate.py`
+  - Backend: `.claude/skills/pod-research/scripts/validate.py`
 
-- **`calculate_price`** - Calculates recommended pricing for POD products
-  - Input: `product_type` (t-shirt, hoodie, mug, poster, sticker, tote-bag)
+- **`mcp__logic-validator__calculate_price`** - Calculates recommended pricing
+  - Input: `product_type` (enum: t-shirt, hoodie, mug, poster, sticker, tote-bag)
   - Returns: Price breakdown with margins, fees, min/max ranges
-  - Calls: `.claude/skills/pod-pricing/scripts/pricing.py`
+  - Backend: `.claude/skills/pod-pricing/scripts/pricing.py`
 
-- **`read_brand_voice`** - Retrieves style guide documentation
+- **`mcp__logic-validator__read_brand_voice`** - Retrieves style guide documentation
   - Input: `brand` (default: "lwf", also supports "touge")
   - Returns: Full brand voice guidelines from `.claude/memories/brand_voice_{brand}.md`
 
-- **`save_to_history`** - Persists research results for future reference
+- **`mcp__logic-validator__save_to_history`** - Persists research results
   - Input: `data` object with niche, validation_result, pricing, design_concept, timestamp
   - Saves to: `.claude/memories/history.json`
 
-- **`read_history`** - Retrieves past research runs
+- **`mcp__logic-validator__read_history`** - Retrieves past research
   - Input: `niche_filter` (optional substring), `limit` (default: 10)
   - Returns: Matching entries sorted by timestamp descending
 
-### External MCP Tools - Search Strategy
+### Data-Etsy Tools (4-Tier Fallback System)
 
-You have access to two search engines with complementary strengths. Use this decision tree for optimal performance:
+Implements intelligent fallback across data sources with cost optimization:
 
-#### Brave Search (Primary for Structured Data)
+**Tier 1:** Etsy API (FREE, 100% accurate) → **Tier 2:** Serper ($0.0003/query, 95% accurate) → **Tier 3:** Perplexity (LLM-based scraping, 85% accurate) → **Tier 4:** Brave (free fallback, 75% accurate)
 
-**Best for:**
-- Etsy listing counts (use `site:etsy.com` operator)
-- Competitor product analysis
-- Price point research
-- Specific marketplace data
-- High-volume batch queries
+- **`mcp__data-etsy__etsy_search_listings`** - Search Etsy listings by keyword
+  - Input: `keyword` (string), `limit` (number, default: 10)
+  - Returns: Array of listing objects with metadata
 
-**Example queries:**
-```
-site:etsy.com "pickleball gifts"
-site:etsy.com cottagecore t-shirt
-etsy pickleball mug price range
-```
+- **`mcp__data-etsy__etsy_get_listing_count`** - Get total listing count with automatic fallback
+  - Input: `keyword` (string)
+  - Returns: `{ count, source, confidence, cached, timestamp }`
+  - Caches results in `.cache/etsy-listing-counts.json`
 
-**When to use:**
-- Step 2 of Standard Research Workflow (Market Research)
-- Counting Etsy listings for competition analysis
-- Finding specific product listings
-- Fast, cost-effective searches (primary choice)
+### Data-Trends Tools
 
-#### Perplexity (Fallback for Deep Context)
-
-**Best for:**
-- Trend analysis with narrative context
-- Market sentiment and cultural insights
-- Complex questions requiring synthesis
-- When Brave Search fails or returns insufficient data
-- Understanding "why" a niche is trending
-
-**Example queries:**
-```
-Is cottagecore trending in 2025? What demographics are interested?
-Pickleball market growth trends and target audience demographics
-What are the most popular JDM car culture niches right now?
-```
-
-**When to use:**
-- Brave Search returns errors or insufficient results
-- Need qualitative insights beyond listing counts
-- Understanding trend direction (rising vs declining)
-- Competitor strategy analysis
-- Cultural context for niche validation
-
-#### Fallback Strategy
-
-1. **Always try Brave Search first** for marketplace data (faster, more structured)
-2. **Switch to Perplexity if:**
-   - Brave returns API errors
-   - Need context beyond raw numbers
-   - Analyzing trend direction/sentiment
-   - Researching new/emerging niches
-3. **Use both when:**
-   - High-stakes decision (borderline validation score)
-   - Conflicting signals (low listings but strong trend)
-   - Need both quantitative + qualitative data
-
-#### Tool Selection Examples
-
-**Scenario 1: Counting Etsy Listings**
-- ✅ Use Brave: `site:etsy.com "pickleball" -"gift card"`
-- ❌ Not Perplexity (slower, less precise counts)
-
-**Scenario 2: Understanding Trend Context**
-- ❌ Not Brave (returns links, not analysis)
-- ✅ Use Perplexity: "Why is cottagecore trending and who buys cottagecore products?"
-
-**Scenario 3: Full Market Research**
-- ✅ Use Brave first for Etsy counts
-- ✅ Then Perplexity for trend analysis and demographics
-- Combine both for comprehensive validation
-
-**Scenario 4: Brave API Error**
-- ⚠️ Brave fails with API error
-- ✅ Fall back to Perplexity: "How many Etsy listings exist for pickleball gifts?"
-- Note in research report: "Used Perplexity fallback due to Brave API unavailability"
-
-### Other External Tools
-
-- **Filesystem** - Read/write project files, documentation
+- **`mcp__data-trends__trends_get_stability`** - Google Trends stability analysis
+  - Input: `keyword` (string), `timeframe` (enum: 3mo, 6mo, 12mo, default: 12mo)
+  - Returns: Stability score, trend direction, confidence metrics
+  - Caches results for 24 hours
 
 ## Autonomous Workflow Protocol
 
@@ -151,32 +100,25 @@ What are the most popular JDM car culture niches right now?
 
 Execute this entire sequence for every niche research request:
 
-1. **Check History** - Invoke `read_history` with niche filter to avoid duplicate work
+1. **Check History** - Call `read_history` with niche filter to avoid duplicate work
 
-2. **Market Research** - Follow this search strategy:
-   - **Step 2a (Quantitative):** Use Brave Search first:
-     - Etsy listing counts: `site:etsy.com "[niche]"`
-     - Price ranges and competition
-   - **Step 2b (Qualitative):** Use Perplexity for context:
-     - Trend direction and growth trajectory
-     - Target demographics and market sentiment
-     - Cultural context (why the niche is/isn't trending)
-   - **Fallback:** If Brave fails, use Perplexity for all data gathering
+2. **Market Research** - Use data-etsy tools:
+   - Call `etsy_get_listing_count` for competition data
+   - Call `trends_get_stability` for trend analysis
 
-3. **Validate Niche** - Invoke `validate_niche` with gathered metrics
-   - Input etsy_count from Brave Search results
-   - Input trend_score derived from Perplexity trend analysis (0.0-1.0 scale)
+3. **Validate Niche** - Call `validate_niche` with gathered metrics
+   - Input etsy_count from step 2
+   - Input trend_score from Google Trends (0.0-1.0 normalized scale)
 
-4. **Load Brand Guidelines** - Invoke `read_brand_voice` to load style rules
+4. **Load Brand Guidelines** - Call `read_brand_voice` to load style rules
 
 5. **Generate Design Concept** - Synthesize concept aligned with brand voice
-   - Use trend insights from Perplexity to inform design direction
+   - Use trend insights to inform design direction
    - Align with LWF or Touge brand guidelines
 
-6. **Calculate Pricing** - Invoke `calculate_price` for primary product type (default: t-shirt)
+6. **Calculate Pricing** - Call `calculate_price` for primary product type (default: t-shirt)
 
-7. **Persist Results** - Invoke `save_to_history` with complete analysis data
-   - Include both quantitative (Brave) and qualitative (Perplexity) insights
+7. **Persist Results** - Call `save_to_history` with complete analysis data
 
 8. **Present Report** - Format comprehensive summary (see Output Format below)
 
@@ -185,6 +127,8 @@ Execute this entire sequence for every niche research request:
 ## Business Rules & Validation Criteria
 
 ### Niche Validation Thresholds
+
+Implemented in `.claude/skills/pod-research/scripts/validate.py`:
 
 - **Etsy Competition:**
   - <1,000 listings: Low competition (ideal)
@@ -207,35 +151,23 @@ Execute this entire sequence for every niche research request:
 
 ### Pricing Rules
 
-- **Etsy Fee Structure:** 22.5% total (6.5% transaction, 3% payment, 12% ads, 1% regulatory)
-- **Target Margin:** 35% ideal, 25% minimum, 50% maximum
-- **Base Costs (USD):**
-  - `t-shirt`: $12.50 (standard), $16.00 (premium)
-  - `hoodie`: $28.00
-  - `mug`: $8.50
-  - `poster`: $12.00 (12x18), $18.00 (18x24)
-  - `sticker`: $2.50 (3x3)
-- **Pricing Formula:** `price = cost / ((1 - fees) * (1 - margin))`, rounded to `.99`
+Implemented in `.claude/skills/pod-pricing/scripts/pricing.py`:
 
-### Brand Assignment
+- **Etsy Fee Structure:** 22.5% total (6.5% transaction + 3% payment + 12% ads + 1% regulatory)
+- **Product Base Costs (USD):**
+  - `t-shirt`: $12.00
+  - `hoodie`: $25.00
+  - `mug`: $8.00
+  - `poster`: $10.00
+  - `sticker`: $3.00
+  - `tote-bag`: $15.00
+- **Markup Multipliers:** t-shirt 2.0x, hoodie 1.8x, mug 2.5x, poster 2.2x, sticker 3.0x, tote-bag 2.0x
+- **Minimum Margins:** t-shirt 40%, hoodie 35%, mug 50%, poster 45%, sticker 60%, tote-bag 40%
+
+### Brand Assignment Logic
 
 - **LWF Designs:** Health-conscious, eco-aware, sustainability, wellness, mindful living, natural products, botanical, earth tones
-- **Touge Technicians:** Automotive, JDM, motorsports, racing, car culture
-
-## Skills System
-
-Five specialized skills in `.claude/skills/`, each with:
-- `SKILL.md` - Skill definition and execution flow
-- `scripts/` - Python/JS automation scripts
-- `prompts/` - Template files for LLM-generated content
-
-### Available Skills
-
-1. **pod-research** - Niche validation (1.5K-2.5K tokens)
-2. **pod-design-review** - Design concept generation (5K-8K tokens)
-3. **pod-pricing** - Price calculation (100-150 tokens, deterministic)
-4. **pod-listing-seo** - SEO-compliant listing copy (4K-6K tokens)
-5. **memory-manager** - Persist GO decisions, archive SKIP reasoning (0.5K-0.9K tokens)
+- **Touge Technicians:** Automotive, JDM, motorsports, racing, car culture, drifting, mountain pass racing
 
 ## Output Format
 
@@ -250,10 +182,11 @@ Present final analysis reports in this structure:
 - Etsy Presence: [listing count and interpretation]
 - Trend Score: [score and trajectory]
 - Competition Level: [low/moderate/high]
+- Data Source: [which tier was used from fallback system]
 
 #### Validation Result
 - **Recommendation:** [GO/SKIP]
-- **Confidence:** [low/medium/high]
+- **Confidence:** [0.00-1.00 score]
 - **Key Concerns:** [list if any]
 - **Reasoning:** [explanation]
 
@@ -266,6 +199,7 @@ Present final analysis reports in this structure:
 - **Recommended Price:** $[amount]
 - **Minimum Viable Price:** $[amount]
 - **Expected Margin:** [percentage]
+- **Cost Breakdown:** [base cost, fees, profit]
 
 #### Next Steps
 [Actionable recommendations based on the analysis]
@@ -273,43 +207,17 @@ Present final analysis reports in this structure:
 
 ## Error Recovery
 
-If any tool invocation fails:
-1. Note the error in your reasoning
-2. Attempt reasonable recovery:
-   - Retry with corrected parameters
-   - Proceed with partial data if non-critical
-   - Use reasonable defaults if data unavailable
-3. Include any limitations in final report
-4. **Do not halt the entire workflow for recoverable errors**
+MCP servers implement circuit breaker patterns that automatically handle failures:
 
-## Tool Execution Patterns
+- **Circuit Breaker States:** Closed (normal) → Open (failing) → Half-Open (testing recovery)
+- **Automatic Tier Fallback:** data-etsy automatically tries next tier on failure
+- **Cache-First Strategy:** Reduces API failures by serving cached data when available
 
-### Niche Research Request
-User says: "Research [niche]" or "Analyze [niche] for POD"
-→ Execute full Standard Research Workflow autonomously
-
-### Price Check Request
-User says: "What should I price [product]?"
-→ Invoke `calculate_price` directly
-
-### History Query
-User says: "What niches have we analyzed?"
-→ Invoke `read_history` with no filter, present summary
-
-### Design Help
-User says: "Generate a design concept for [niche/product]"
-→ Invoke `read_brand_voice`, then generate concept based on guidelines
-
-## Naming Conventions
-
-Follow conventions in `NAMING_CONVENTIONS.md`:
-
-- **Files/Directories:** lowercase-with-hyphens
-- **Skills:** `{domain}-{action}` (e.g., `pod-research`)
-- **MCP Tools:** snake_case verbs (`validate_niche`, `calculate_price`)
-- **Brand Voice Files:** `brand_voice_{brand}.md`
-- **Data Files:** `validated_{entity}.json`
-- **Environment Variables:** ALL_CAPS_SNAKE_CASE with service prefix (`ETSY_API_KEY`, `BRAVE_API_KEY`)
+If tool invocations fail:
+1. Note the error and which tier failed
+2. Rely on automatic fallback to next tier
+3. Include data source and confidence in final report
+4. **Do not halt workflow** - proceed with best available data
 
 ## Development Commands
 
@@ -321,32 +229,43 @@ npm install
 npm run lint   # echoes "no lint configured"
 npm run test   # echoes "no tests configured"
 
-# MCP server manual testing
+# Test MCP servers manually
 cd .claude/mcp-servers/logic-validator
 echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | node index.js
 
 # Test validate_niche tool
 echo '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"validate_niche","arguments":{"niche":"pickleball","etsy_count":1500,"trend_score":0.65}}}' | node index.js
+
+# Test data-etsy with debug mode
+cd .claude/mcp-servers/data-etsy
+DEBUG_MCP=1 node test.js
+
+# Test trends API
+cd .claude/mcp-servers/data-trends
+node index.js
 ```
 
 ## Configuration Files
 
-- **`.mcp.json`** - MCP server configuration (filesystem, brave-search, logic-validator)
-- **`plugin.json`** - Plugin metadata, skill definitions, automation hooks
+- **`.mcp.json`** - MCP server configuration with environment variable mapping
+- **`plugin.json`** - Plugin metadata, skill definitions, token budgets, automation hooks
+- **`.env`** - API keys (gitignored): `ETSY_API_KEY`, `ETSY_ACCESS_TOKEN`, `SERPER_API_KEY`, `PERPLEXITY_API_KEY`, `BRAVE_API_KEY`
 - **`.claude/config/fallbacks.json`** - Fallback strategies for failed operations
 - **`.claude/config/checkpoint-strategy.json`** - Checkpoint configuration
-- **`.claude/hooks/post-skill-complete.json`** - Post-execution automation hooks
 
-## Token Budget Management
+## Naming Conventions
 
-- **Total Context Window:** 200,000 tokens
-- **Auto-compact:** Triggers at 180K tokens
-- **Per-Skill Budgets:**
-  - Research: 1.5K-2.5K
-  - Design: 5K-8K
-  - Pricing: 100-150
-  - SEO: 4K-6K
-  - Memory: 0.5K-0.9K
+From `NAMING_CONVENTIONS.md`:
+
+- **Files/Directories:** lowercase-with-hyphens
+- **Skills:** `{domain}-{action}` (e.g., `pod-research`)
+- **MCP Tools:** snake_case verbs (`validate_niche`, `calculate_price`, `etsy_get_listing_count`)
+- **Brand Voice Files:** `brand_voice_{brand}.md`
+- **Data Files:** `validated_{entity}.json`
+- **Environment Variables:** ALL_CAPS_SNAKE_CASE with service prefix
+- **Python functions:** snake_case
+- **JavaScript functions:** camelCase
+- **Classes:** PascalCase
 
 ## Performance Targets
 
@@ -354,11 +273,26 @@ echo '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"validate_n
 - **Price Calculation:** <5 seconds, fully deterministic
 - **Full Pipeline:** 8K-12K tokens (research → design → pricing → listing)
 - **Research-Only:** 2K-3K tokens (fast validation)
+- **Cache Hit Rate:** Target >80% for Etsy listing counts
 
-## Maintenance Notes
+## Token Budget Management
 
-- Keep `.env` locally (gitignored) with API keys (`BRAVE_API_KEY`, `ETSY_API_KEY`)
-- Check `.claude/data/logs/` for errors
-- History persists in `.claude/memories/history.json`
-- Skipped niches archived in `.claude/data/skipped_niches.json`
-- Utility scripts in `.claude/scripts/` for monitoring and maintenance
+From `plugin.json`:
+
+- **Total Context Window:** 200,000 tokens
+- **Auto-compact:** Triggers at 180K tokens
+- **Per-Skill Budgets:**
+  - pod-research: 1.5K-2.5K
+  - pod-design-review: 5K-8K
+  - pod-pricing: 100-150
+  - pod-listing-seo: 4K-6K
+  - memory-manager: 0.5K-0.9K
+
+## Data Persistence
+
+- **History:** `.claude/memories/history.json` - All research runs with full context
+- **Validated Niches:** `.claude/memories/validated_niches.json` - GO decisions only
+- **Skipped Niches:** `.claude/data/skipped_niches.json` - SKIP decisions with reasoning
+- **Brand Voice:** `.claude/memories/brand_voice_{brand}.md` - Style guides for each brand
+- **Etsy Cache:** `.cache/etsy-listing-counts.json` - Cached listing counts with timestamps
+- **Logs:** `.claude/data/logs/` - MCP call logs, API usage, errors
