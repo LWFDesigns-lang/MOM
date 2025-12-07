@@ -1,0 +1,25 @@
+{
+  "name": "logic-validator-mcp",
+  "version": "1.0.0",
+  "description": "MCP server exposing POD business logic validation tools",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "mcp",
+    "pod",
+    "validation",
+    "model-context-protocol"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT",
+  "author": "POD Business Lean Agent",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/pod-business"
+  }
+}
