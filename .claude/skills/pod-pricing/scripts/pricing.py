@@ -78,7 +78,7 @@ def calculate_price(product_type: str) -> Dict:
         return {
             "error": f"Invalid product_type: '{product_type}'",
             "valid_options": valid_types,
-            "example": f"python pricing.py '{{\"product_type\": \"{valid_types[0]}\"}}''"
+            "example": f"python pricing.py '{{\"product_type\": \"{valid_types[0]}\"}}'"
         }
     
     # Get base values
