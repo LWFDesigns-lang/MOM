@@ -9,7 +9,7 @@ services:
     volumes:
       - qdrant-pod-storage:/qdrant/storage  # Persistent storage across restarts
     environment:
-      QDRANT_API_KEY: "${QDRANT_API_KEY}"  # Injected via AWS Secrets Manager at runtime
+      QDRANT_API_KEY: "${QDRANT_API_KEY}"
       QDRANT_READ_ONLY_API_KEY: "${QDRANT_READONLY_KEY}"
     deploy:
       replicas: 1
@@ -33,7 +33,7 @@ services:
       - neo4j-pod-data:/var/lib/neo4j/data
       - neo4j-log:/logs
     environment:
-      NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD}"  # Password kept in AWS Secrets Manager
+      NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD}"
       NEO4J_dbms_memory_pagecache_size: "1G"
       NEO4J_dbms_memory_heap_initial__size: "1G"
       NEO4J_dbms_memory_heap_max__size: "2G"

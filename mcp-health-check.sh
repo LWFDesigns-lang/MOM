@@ -32,11 +32,11 @@ check_json() {
   fi
 }
 
-warn_env() {
+check_env() {
   if [[ -f ".env" ]]; then
-    status "$YELLOW" "⚠ .env exists. Confirm it contains placeholders only; real secrets must live in AWS Secrets Manager."
+    status "$GREEN" "✓ .env exists. Ensure it contains your local environment variables."
   else
-    status "$YELLOW" "⚠ .env not found. Create one from .env.example for placeholders, not production secrets."
+    status "$YELLOW" "⚠ .env not found. Create one from .env.example with your credentials for local setup."
   fi
 }
 
@@ -71,7 +71,7 @@ check_docker_container() {
 printf "\n==== MCP HEALTH CHECK ====\n"
 check_file ".mcp.json"
 check_json ".mcp.json"
-warn_env
+check_env
 
 printf "\n"
 list_servers
@@ -94,15 +94,11 @@ printf "\n==== Docker health ====\n"
 check_docker_container "qdrant-pod"
 check_docker_container "neo4j-pod"
 
-printf "\n==== Credential reminders ====\n"
-status "$YELLOW" "• Use AWS Secrets Manager JIT retrieval (see security-config.md)."
-status "$YELLOW" "• Tokens rotate every 60 minutes (BRAVE_OAUTH_TTL / ETSY_OAUTH_TTL etc.)."
-status "$YELLOW" "• No plaintext API keys in .env or git history."
 
 printf "\n==== Troubleshooting hints ====\n"
 status "$YELLOW" "• Missing binary → run: npm install @anthropic-ai/mcp-server-filesystem @anthropic-ai/mcp-server-brave-search perplexity-mcp @anthropic-ai/mcp-server-playwright etsy-mcp shopify-mcp"
 status "$YELLOW" "• Docker container kept down? Run 'docker-compose up -d'."
-status "$YELLOW" "• Validation failing? Ensure AWS Secrets Manager credentials (vault URIs) are reachable."
+status "$YELLOW" "• Validation failing? Ensure environment variables are set correctly in .env."
 status "$YELLOW" "• Windows/PowerShell: use Git Bash or WSL to run this script; alternatives include 'bash mcp-health-check.sh'."
 
 printf "\nMCP health check complete.\n"
