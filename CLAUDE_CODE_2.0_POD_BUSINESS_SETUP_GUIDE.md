@@ -64,11 +64,14 @@ Claude Code 2.0 POD Business Assistant automates 95% of Print-on-Demand operatio
 - Claude Sonnet 4.5 (200K token base window)
 - MCP v2.0 specification (November 2025)
 
-**Infrastructure:**
-- Docker (Qdrant vector DB, Neo4j graph DB)
-- Node.js 20.x LTS (MCP server runtime)
-- Python 3.11+ (deterministic validation scripts)
-- AWS Secrets Manager (OAuth JIT credential retrieval)
+<!-- DEPRECATED: The following Docker/AWS Infrastructure section is from the Enterprise architecture phase.
+     The current Lean Agent MVP uses local execution only. See .claude/CLAUDE.md for current setup. -->
+
+**Infrastructure (DEPRECATED - Enterprise Phase Only):**
+- Docker (Qdrant vector DB, Neo4j graph DB) - NOT USED IN CURRENT MVP
+- Node.js 20.x LTS (MCP server runtime) - STILL USED
+- Python 3.11+ (deterministic validation scripts) - STILL USED
+- AWS Secrets Manager (OAuth JIT credential retrieval) - NOT USED IN CURRENT MVP
 
 **MCP Servers (Tier 1 & 2):**
 - **Tier 1:** filesystem, git, memory (official Anthropic)
@@ -274,8 +277,11 @@ Every MCP call logged with timestamp, server, tool, status, duration per [`secur
    python --version  # Should show Python 3.11.x
    ```
 
-3. **Docker Desktop**
+<!-- DEPRECATED: Docker Desktop is NOT required for the current Lean Agent MVP architecture. -->
+
+3. **Docker Desktop (DEPRECATED - NOT REQUIRED)**
    ```powershell
+   # NOTE: The following Docker setup is from the Enterprise phase and is NOT needed for current MVP
    # Download from https://www.docker.com/products/docker-desktop
    # Verify installation
    docker --version
@@ -300,8 +306,11 @@ Every MCP call logged with timestamp, server, tool, status, duration per [`secur
    claude --version
    ```
 
-6. **AWS CLI** (for Secrets Manager)
+<!-- DEPRECATED: AWS CLI is NOT required for the current Lean Agent MVP architecture. -->
+
+6. **AWS CLI (DEPRECATED - NOT REQUIRED)** (for Secrets Manager)
    ```powershell
+   # NOTE: The following AWS setup is from the Enterprise phase and is NOT needed for current MVP
    # Windows
    msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi
    
@@ -363,11 +372,16 @@ Every MCP call logged with timestamp, server, tool, status, duration per [`secur
 
 > ⚠️ **Warning:** Failure to disclose can result in listing removal or account suspension.
 
-#### 3.2.4 AWS Account
+<!-- DEPRECATED: AWS Account setup is NOT required for the current Lean Agent MVP architecture.
+     The current system does not use AWS Secrets Manager for credential storage. -->
 
-**Purpose:** OAuth credential storage via Secrets Manager
+#### 3.2.4 AWS Account (DEPRECATED - NOT REQUIRED)
 
-**Setup:**
+**Purpose:** OAuth credential storage via Secrets Manager (ENTERPRISE PHASE ONLY)
+
+**NOTE: This section is deprecated and NOT needed for the current MVP.**
+
+**Setup (Historical Reference Only):**
 1. Create AWS account (free tier eligible)
 2. Configure IAM user with `SecretsManagerReadWrite` policy
 3. Generate access keys for CLI

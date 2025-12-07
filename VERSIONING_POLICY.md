@@ -9,7 +9,7 @@ This project follows [Semantic Versioning 2.0.0](https://semver.org/): **MAJOR.M
 ## Components
 - Skills: version in `SKILL.md` frontmatter; breaking interface changes require MAJOR.
 - MCP servers: follow semantic versioning; pin exact versions in `.mcp.json`.
-- Docker images: pin exact versions (no `:latest`); review quarterly.
+<!-- DEPRECATED: Docker images (Enterprise phase only - not used in current Lean Agent MVP) -->
 - Dependencies: maintain `package-lock.json` once npm packages are resolved; review monthly.
 
 ## Release Process
