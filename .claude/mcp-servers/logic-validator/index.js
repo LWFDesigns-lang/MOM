@@ -169,7 +169,7 @@ const TOOLS = [
  */
 async function executePython(scriptPath, args) {
   return new Promise((resolve, reject) => {
-    const proc = spawn('python', [scriptPath, JSON.stringify(args)]);
+    const proc = spawn('python3', [scriptPath, JSON.stringify(args)]);
     let stdout = '';
     let stderr = '';
 
@@ -195,7 +195,7 @@ async function executePython(scriptPath, args) {
     });
 
     proc.on('error', (err) => {
-      reject(new Error(`Failed to spawn python: ${err.message}`));
+      reject(new Error(`Failed to spawn python3: ${err.message}`));
     });
   });
 }
