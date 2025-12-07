@@ -1,1 +1,101 @@
-[]
+[
+  {
+    "niche": "pickleball",
+    "validation_result": {
+      "valid": true,
+      "confidence": "high",
+      "recommendation": "proceed",
+      "reasoning": "Strong opportunity: Moderate competition with strong trend"
+    },
+    "pricing": {
+      "product_type": "t-shirt",
+      "recommended_price": 24.99,
+      "profit_margin_percent": 29.5
+    },
+    "design_concept": "Modern pickleball paddle with minimalist line art and text 'Dink Responsibly'",
+    "timestamp": "2025-12-07T10:30:00Z"
+  },
+  {
+    "niche": "cottagecore",
+    "validation_result": {
+      "valid": true,
+      "confidence": "high",
+      "recommendation": "proceed",
+      "reasoning": "Strong opportunity: Moderate competition (3200 listings) with strong trend (58.0%); Growing market with strong interest"
+    },
+    "pricing": {
+      "product_type": "t-shirt",
+      "base_cost": 12,
+      "recommended_price": 24.99,
+      "minimum_price": 32.99,
+      "profit_margin_percent": 29.5
+    },
+    "design_concept": "Watercolor wildflower bouquet in pastel tones with text 'Slow Living' in clean sans-serif. Features delicate florals in soft greens, lavenders, and cream (#A8D8A8, #E8F5E9, #F5E6D3). Minimalist composition with generous whitespace, perfect for the cottagecore aesthetic while maintaining LWF's uplifting, nature-focused brand voice.",
+    "brand": "lwf",
+    "target_audience": "Lifestyle-conscious consumers interested in slow living, nature, and mindful aesthetics",
+    "timestamp": "2025-12-07T10:35:00Z"
+  },
+  {
+    "niche": "test-niche-verification",
+    "validation_result": {
+      "valid": true,
+      "confidence": "high",
+      "recommendation": "proceed",
+      "reasoning": "Test entry for system verification"
+    },
+    "pricing": {
+      "product_type": "t-shirt",
+      "base_cost": 12,
+      "recommended_price": 24.99,
+      "minimum_price": 32.99,
+      "profit_margin_percent": 29.5
+    },
+    "design_concept": "Test design concept for verification",
+    "brand": "lwf",
+    "timestamp": "2025-12-07T12:00:00Z"
+  },
+  {
+    "niche": "yoga",
+    "validation_result": {
+      "valid": true,
+      "confidence": "high",
+      "recommendation": "proceed",
+      "reasoning": "Strong opportunity: Moderate competition (4500 listings) with strong trend (72.0%); Growing market with strong interest"
+    },
+    "pricing": {
+      "product_type": "t-shirt",
+      "base_cost": 12,
+      "recommended_price": 24.99,
+      "minimum_price": 32.99,
+      "profit_margin_percent": 29.5,
+      "cost_breakdown": {
+        "production": 12,
+        "platform_fees_estimate": 5.62,
+        "profit_at_recommended": 7.37
+      }
+    },
+    "design_concept": "Minimalist line art of a person in tree pose (Vrksasana) with subtle watercolor wash in pastel greens and earth tones. Text 'Find Your Balance' in clean sans-serif typography. Colors: #A8D8A8 (pastel green), #F5E6D3 (warm neutral), #E8F5E9 (light mint). Simple, centered composition with generous whitespace, readable from 10 feet. Uplifting message aligned with LWF's wellness and mindfulness themes.",
+    "brand": "lwf",
+    "target_audience": "Yoga practitioners, wellness enthusiasts, mindfulness-focused lifestyle consumers aged 25-45",
+    "timestamp": "2025-12-07T12:15:00Z"
+  },
+  {
+    "niche": "cottagecore aesthetic",
+    "validation_result": {
+      "valid": true,
+      "confidence": "high",
+      "concerns": [
+        "High competition requires unique angle to succeed"
+      ],
+      "recommendation": "proceed",
+      "reasoning": "Strong opportunity: High competition (45000 listings) but very strong trend (72.0%)"
+    },
+    "pricing": {
+      "product_type": "t-shirt",
+      "recommended_price": 24.99,
+      "profit_margin_percent": 29.5
+    },
+    "design_concept": "Watercolor botanical garden scene with pastel greens and earth tones, featuring wildflowers and herbs in vintage mason jars. Text: 'Cottage Life' in clean serif font. Minimalist line art style with soft backgrounds aligned to LWF's nature wellness aesthetic.",
+    "timestamp": "2025-12-07T22:45:00Z"
+  }
+]

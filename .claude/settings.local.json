@@ -1,0 +1,9 @@
+{
+  "enabledMcpjsonServers": [
+    "filesystem",
+    "brave-search",
+    "logic-validator",
+    "docker"
+  ],
+  "enableAllProjectMcpServers": true
+}

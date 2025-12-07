@@ -1,0 +1,16 @@
+{
+  "name": "data-etsy-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for Etsy data operations",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

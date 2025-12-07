@@ -9,7 +9,7 @@
     "test": "echo \"no tests configured\""
   },
   "dependencies": {
-    "@anthropic-ai/mcp-server-sdk": "^1.0.0"
+    "@modelcontextprotocol/sdk": "^1.0.0"
   },
   "optionalDependencies": {
     "@anthropic-ai/mcp-server-brave-search": "^1.0.0",

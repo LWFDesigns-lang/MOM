@@ -19,7 +19,8 @@
         "SERPER_API_KEY": "${SERPER_API_KEY}",
         "PERPLEXITY_API_KEY": "${PERPLEXITY_API_KEY}",
         "BRAVE_API_KEY": "${BRAVE_API_KEY}"
-      }
+      },
+      "alwaysAllow": ["etsy_search_listings", "etsy_get_listing_count"]
     },
     "data-trends": {
       "command": "node",
@@ -28,11 +29,12 @@
     },
     "docker": {
       "command": "docker.exe",
-      "args": ["mcp", "gateway", "run"]
+      "args": ["mcp", "gateway", "run"],
+      "alwaysAllow": ["mcp-find", "mcp-add", "mcp-config-set", "brave_web_search", "fetch", "perplexity_research"]
     }
   },
   "security_compliance": {
     "auth_method": "oauth_only",
     "static_keys": false
-  } 
+  }
 }

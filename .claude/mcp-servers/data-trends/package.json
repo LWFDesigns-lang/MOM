@@ -1,0 +1,18 @@
+{
+  "name": "data-trends-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for trends data operations",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "google-trends-api": "^4.9.2",
+    "node-cache": "^5.1.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

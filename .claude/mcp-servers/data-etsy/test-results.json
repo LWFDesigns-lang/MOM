@@ -1,0 +1,161 @@
+{
+  "timestamp": "2025-12-07T22:14:55.951Z",
+  "accuracy": 28.57142857142857,
+  "results": [
+    {
+      "keyword": "t-shirt",
+      "minExpected": 50000,
+      "maxExpected": 500000,
+      "category": "High-Volume",
+      "success": true,
+      "count": -1,
+      "source": "fallback",
+      "confidence": "none",
+      "cached": false,
+      "duration": 4948,
+      "accurate": false,
+      "timestamp": "2025-12-07T22:14:13.603Z",
+      "error": "All data sources failed or unavailable"
+    },
+    {
+      "keyword": "handmade jewelry",
+      "minExpected": 100000,
+      "maxExpected": 1000000,
+      "category": "High-Volume",
+      "success": true,
+      "count": 1,
+      "source": "perplexity",
+      "confidence": "medium",
+      "cached": false,
+      "duration": 3899,
+      "accurate": false,
+      "timestamp": "2025-12-07T22:14:17.502Z",
+      "error": null
+    },
+    {
+      "keyword": "sticker",
+      "minExpected": 100000,
+      "maxExpected": 800000,
+      "category": "High-Volume",
+      "success": true,
+      "count": 1,
+      "source": "perplexity",
+      "confidence": "medium",
+      "cached": false,
+      "duration": 3734,
+      "accurate": false,
+      "timestamp": "2025-12-07T22:14:21.237Z",
+      "error": null
+    },
+    {
+      "keyword": "vintage poster",
+      "minExpected": 10000,
+      "maxExpected": 100000,
+      "category": "Medium-Volume",
+      "success": true,
+      "count": 1500,
+      "source": "perplexity",
+      "confidence": "medium",
+      "cached": false,
+      "duration": 3419,
+      "accurate": false,
+      "timestamp": "2025-12-07T22:14:24.656Z",
+      "error": null
+    },
+    {
+      "keyword": "custom dog portrait",
+      "minExpected": 5000,
+      "maxExpected": 50000,
+      "category": "Medium-Volume",
+      "success": true,
+      "count": 8000,
+      "source": "perplexity",
+      "confidence": "medium",
+      "cached": false,
+      "duration": 7002,
+      "accurate": true,
+      "timestamp": "2025-12-07T22:14:31.658Z",
+      "error": null
+    },
+    {
+      "keyword": "personalized mug",
+      "minExpected": 20000,
+      "maxExpected": 150000,
+      "category": "Medium-Volume",
+      "success": true,
+      "count": 35,
+      "source": "brave",
+      "confidence": "low",
+      "cached": false,
+      "duration": 4652,
+      "accurate": false,
+      "timestamp": "2025-12-07T22:14:36.309Z",
+      "error": null
+    },
+    {
+      "keyword": "quantum physics mug",
+      "minExpected": 100,
+      "maxExpected": 10000,
+      "category": "Niche",
+      "success": true,
+      "count": 30,
+      "source": "perplexity",
+      "confidence": "medium",
+      "cached": false,
+      "duration": 3768,
+      "accurate": false,
+      "timestamp": "2025-12-07T22:14:40.077Z",
+      "error": null
+    },
+    {
+      "keyword": "steampunk octopus",
+      "minExpected": 100,
+      "maxExpected": 5000,
+      "category": "Niche",
+      "success": true,
+      "count": 100,
+      "source": "perplexity",
+      "confidence": "medium",
+      "cached": false,
+      "duration": 4959,
+      "accurate": true,
+      "timestamp": "2025-12-07T22:14:45.036Z",
+      "error": null
+    },
+    {
+      "keyword": "pickleball paddle custom",
+      "minExpected": 500,
+      "maxExpected": 8000,
+      "category": "Niche",
+      "success": true,
+      "count": -1,
+      "source": "fallback",
+      "confidence": "none",
+      "cached": false,
+      "duration": 5070,
+      "accurate": false,
+      "timestamp": "2025-12-07T22:14:50.106Z",
+      "error": "All data sources failed or unavailable"
+    }
+  ],
+  "cacheTestResults": [
+    {
+      "keyword": "t-shirt",
+      "cached": false,
+      "duration": 5837,
+      "source": "fallback"
+    },
+    {
+      "keyword": "vintage poster",
+      "cached": true,
+      "duration": 1,
+      "source": "cache"
+    },
+    {
+      "keyword": "quantum physics mug",
+      "cached": true,
+      "duration": 1,
+      "source": "cache"
+    }
+  ]
+}

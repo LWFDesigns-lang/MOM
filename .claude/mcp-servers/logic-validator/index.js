@@ -1,16 +1,25 @@
 #!/usr/bin/env node
 /**
  * Logic Validator MCP Server
- * 
+ *
  * Exposes POD business logic tools through the Model Context Protocol (MCP) 2.0.
  * Uses stdio transport for JSON-RPC communication with Claude Desktop.
- * 
+ *
+ * MCP 2.0 Compliance:
+ * - Protocol version: 2024-11-05 (MCP 2.0)
+ * - Capabilities: tools (no resources or prompts)
+ * - Transport: stdio with JSON-RPC 2.0
+ * - Error handling: Enhanced with debug logging support
+ *
  * Available Tools:
  * - validate_niche: Validate POD niche viability
  * - calculate_price: Calculate product pricing
  * - read_brand_voice: Read brand style guide
  * - save_to_history: Persist research results
  * - read_history: Retrieve past research
+ *
+ * Debug Mode:
+ * Set DEBUG_MCP=1 environment variable to enable detailed logging to stderr
  */
 
 import { createInterface } from 'readline';
@@ -30,11 +39,31 @@ const STYLE_GUIDE = resolve(WORKSPACE_ROOT, '.claude/skills/pod-design-review/pr
 const HISTORY_FILE = resolve(WORKSPACE_ROOT, '.claude/memories/history.json');
 
 // MCP Server Info
+// Protocol version 2024-11-05 is the MCP 2.0 specification
 const SERVER_INFO = {
   name: 'logic-validator',
   version: '1.0.0',
-  protocolVersion: '2024-11-05'
+  protocolVersion: '2024-11-05' // MCP 2.0
 };
+
+// Debug logging configuration
+const DEBUG = process.env.DEBUG_MCP === '1';
+
+/**
+ * Log debug messages to stderr when DEBUG mode is enabled
+ */
+function debugLog(...args) {
+  if (DEBUG) {
+    console.error('[DEBUG logic-validator]', ...args);
+  }
+}
+
+/**
+ * Log errors to stderr (always enabled)
+ */
+function errorLog(...args) {
+  console.error('[ERROR logic-validator]', ...args);
+}
 
 // Tool Definitions
 const TOOLS = [
@@ -330,16 +359,22 @@ const toolHandlers = {
 async function handleRequest(request) {
   const { id, method, params } = request;
 
+  // Log incoming method for debugging
+  debugLog(`Received method: ${method}`, params ? `with params` : 'without params');
+
   try {
     switch (method) {
       case 'initialize':
+        debugLog('Initializing server with MCP 2.0 protocol');
         return {
           jsonrpc: '2.0',
           id,
           result: {
             protocolVersion: SERVER_INFO.protocolVersion,
+            // MCP 2.0 capabilities - this server only provides tools
+            // Resources and prompts capabilities are not included as they are not supported
             capabilities: {
-              tools: {}
+              tools: {} // Server supports tool listing and execution
             },
             serverInfo: {
               name: SERVER_INFO.name,
@@ -377,15 +412,19 @@ async function handleRequest(request) {
         throw new Error(`Unknown method: ${method}`);
     }
   } catch (error) {
-    // Log error to stderr (not stdout which is for protocol)
-    console.error(`Error handling request:`, error);
+    // Log error to stderr (not stdout which is for JSON-RPC protocol)
+    errorLog(`Error handling method '${method}':`, error.message);
+    if (DEBUG && error.stack) {
+      errorLog('Stack trace:', error.stack);
+    }
     
     return {
       jsonrpc: '2.0',
       id,
       error: {
         code: -32000,
-        message: error.message || 'Unknown error occurred'
+        message: error.message || 'Unknown error occurred',
+        data: DEBUG ? { method, params } : undefined
       }
     };
   }
@@ -393,8 +432,15 @@ async function handleRequest(request) {
 
 /**
  * Main server loop - read from stdin, write to stdout
+ * Implements MCP stdio transport with JSON-RPC 2.0 message handling
  */
 function main() {
+  // Log server startup
+  debugLog('Starting Logic Validator MCP Server');
+  debugLog(`Protocol version: ${SERVER_INFO.protocolVersion}`);
+  debugLog(`Server version: ${SERVER_INFO.version}`);
+  debugLog(`Debug mode: ${DEBUG ? 'enabled' : 'disabled'}`);
+
   const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -403,12 +449,25 @@ function main() {
 
   rl.on('line', async (line) => {
     try {
+      // Parse JSON-RPC request
       const request = JSON.parse(line);
+      
+      // Handle the request
       const response = await handleRequest(request);
+      
+      // Send response via stdout (MCP stdio transport)
       console.log(JSON.stringify(response));
+      
     } catch (err) {
-      console.error('Failed to parse request:', err);
-      // Send error response if we can extract an ID
+      // Enhanced error handling for parse failures
+      errorLog('Failed to parse or handle request:', err.message);
+      
+      if (DEBUG) {
+        errorLog('Raw line:', line);
+        errorLog('Parse error:', err.stack);
+      }
+      
+      // Attempt to send error response if we can extract an ID
       try {
         const partialRequest = JSON.parse(line);
         console.log(JSON.stringify({
@@ -416,17 +475,36 @@ function main() {
           id: partialRequest.id || null,
           error: {
             code: -32700,
-            message: 'Parse error'
+            message: 'Parse error',
+            data: DEBUG ? { error: err.message } : undefined
           }
         }));
-      } catch {
-        // Can't even parse the ID, log to stderr only
+      } catch (parseErr) {
+        // Can't even parse the ID - log to stderr only
+        errorLog('Cannot recover from parse error - unable to extract request ID');
       }
     }
   });
 
   rl.on('close', () => {
+    debugLog('stdin closed, shutting down server');
     process.exit(0);
+  });
+
+  // Handle process errors
+  process.on('uncaughtException', (err) => {
+    errorLog('Uncaught exception:', err.message);
+    if (DEBUG) {
+      errorLog('Stack trace:', err.stack);
+    }
+    process.exit(1);
+  });
+
+  process.on('unhandledRejection', (reason, promise) => {
+    errorLog('Unhandled promise rejection:', reason);
+    if (DEBUG) {
+      errorLog('Promise:', promise);
+    }
   });
 }
 
