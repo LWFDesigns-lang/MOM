@@ -30,22 +30,13 @@
       ],
       "stdio": "stdio",
       "env": {
-        "BRAVE_API_KEY_VAULT": "aws-secretsmanager://prod/brave-api-key",
-        "BRAVE_OAUTH_TTL": "3600",
-        "BRAVE_TOKEN_ENDPOINT": "https://api.search.brave.com/oauth/token"
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
       },
       "security": {
-        "credential_retrieval": "jit",
-        "credential_type": "oauth",
-        "token_rotation_enabled": true,
-        "token_ttl_seconds": 3600,
-        "scope": [
-          "search.read"
-        ],
         "spec_version": "2.0",
         "tier": "tier_2_verified"
       },
-      "notes": "OAuth JIT pattern with AWS Secrets Manager and 60-minute rotation (SEP-835, SEP-1319)."
+      "notes": "Local/home setup: provide BRAVE_API_KEY via .env; rotation manual."
     },
     "perplexity-research": {
       "command": "node",
@@ -54,22 +45,13 @@
       ],
       "stdio": "stdio",
       "env": {
-        "PERPLEXITY_API_KEY_VAULT": "aws-secretsmanager://prod/perplexity-api-key",
-        "PERPLEXITY_OAUTH_TTL": "3600",
-        "PERPLEXITY_TOKEN_ENDPOINT": "https://www.perplexity.ai/api/oauth/token"
+        "PERPLEXITY_API_KEY": "${PERPLEXITY_API_KEY}"
       },
       "security": {
-        "credential_retrieval": "jit",
-        "credential_type": "oauth",
-        "token_rotation_enabled": true,
-        "token_ttl_seconds": 3600,
-        "scope": [
-          "research.read"
-        ],
         "spec_version": "2.0",
         "tier": "tier_2_verified"
       },
-      "notes": "Perplexity used for niche grounding only; no static keys."
+      "notes": "Local/home setup: provide PERPLEXITY_API_KEY via .env."
     },
     "playwright-browser": {
       "command": "node",
@@ -90,6 +72,42 @@
       },
       "notes": "Playwright sandbox only allows documented domains; see SETUP_GUIDE_ARCHITECTURE.md:133-202."
     },
+    "data-etsy": {
+      "command": "node",
+      "args": [
+        ".claude/mcp-servers/data-etsy/index.js"
+      ],
+      "stdio": "stdio",
+      "security": {
+        "tier": "tier_2_custom",
+        "spec_version": "2.0"
+      },
+      "notes": "Custom thin MCP for Etsy listing data retrieval (stubbed)."
+    },
+    "data-trends": {
+      "command": "node",
+      "args": [
+        ".claude/mcp-servers/data-trends/index.js"
+      ],
+      "stdio": "stdio",
+      "security": {
+        "tier": "tier_2_custom",
+        "spec_version": "2.0"
+      },
+      "notes": "Custom thin MCP for trends retrieval (stubbed)."
+    },
+    "logic-validator": {
+      "command": "node",
+      "args": [
+        ".claude/mcp-servers/logic-validator/index.js"
+      ],
+      "stdio": "stdio",
+      "security": {
+        "tier": "tier_2_custom",
+        "spec_version": "2.0"
+      },
+      "notes": "Custom fat MCP for deterministic validation (stubbed)."
+    },
     "qdrant-vector-memory": {
       "command": "docker",
       "args": [
@@ -106,7 +124,7 @@
         "QDRANT_API_KEY=${QDRANT_API_KEY}",
         "-e",
         "QDRANT_READONLY_KEY=${QDRANT_READONLY_KEY}",
-        "qdrant/qdrant:latest"
+        "qdrant/qdrant:v1.7.0"
       ],
       "security": {
         "network": "localhost_only",
@@ -132,7 +150,7 @@
         "neo4j-pod-data:/var/lib/neo4j/data",
         "-e",
         "NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}",
-        "neo4j:latest"
+        "neo4j:5.15.0"
       ],
       "security": {
         "network": "localhost_only",
@@ -151,24 +169,14 @@
       ],
       "stdio": "stdio",
       "env": {
-        "ETSY_API_KEY_VAULT": "aws-secretsmanager://prod/etsy-api-key",
-        "ETSY_API_SECRET_VAULT": "aws-secretsmanager://prod/etsy-api-secret",
-        "ETSY_OAUTH_TTL": "3600",
-        "ETSY_TOKEN_ENDPOINT": "https://openapi.etsy.com/oauth/token"
+        "ETSY_API_KEY": "${ETSY_API_KEY}",
+        "ETSY_API_SECRET": "${ETSY_API_SECRET}"
       },
       "security": {
-        "credential_retrieval": "jit",
-        "credential_type": "oauth",
-        "token_rotation_enabled": true,
-        "token_ttl_seconds": 3600,
-        "scope": [
-          "listings.write",
-          "analytics.read"
-        ],
         "spec_version": "2.0",
         "tier": "tier_2_verified"
       },
-      "notes": "Etsy integration uses OAuth only; env files are for placeholders."
+      "notes": "Local/home setup: provide Etsy credentials via .env."
     },
     "shopify-sync": {
       "command": "node",
@@ -177,25 +185,15 @@
       ],
       "stdio": "stdio",
       "env": {
-        "SHOPIFY_STORE_VAULT": "aws-secretsmanager://prod/shopify-store",
-        "SHOPIFY_TOKEN_VAULT": "aws-secretsmanager://prod/shopify-token",
-        "SHOPIFY_OAUTH_TTL": "3600",
-        "SHOPIFY_TOKEN_ENDPOINT": "https://{store}.myshopify.com/admin/oauth/access_token"
+        "SHOPIFY_STORE": "${SHOPIFY_STORE}",
+        "SHOPIFY_TOKEN": "${SHOPIFY_TOKEN}"
       },
       "security": {
-        "credential_retrieval": "jit",
-        "credential_type": "oauth",
-        "token_rotation_enabled": true,
-        "token_ttl_seconds": 3600,
-        "scope": [
-          "write_products",
-          "read_analytics"
-        ],
         "spec_version": "2.0",
         "tier": "tier_2_verified",
         "future": true
       },
-      "notes": "Prepared for future Shopify sync; vault values supply runtime credentials."
+      "notes": "Prepared for future Shopify sync; supply values via .env when used."
     }
   },
   "security_compliance": {
@@ -207,19 +205,19 @@
       "SEP-1319: Decoupled payload handling"
     ],
     "credential_management": {
-      "pattern": "aws_secretsmanager_jit",
-      "token_rotation": "automatic_60min",
-      "oauth_only": true,
-      "env_file_usage": "forbidden_for_real_values",
+      "pattern": "local_env",
+      "token_rotation": "manual_restart",
+      "oauth_only": false,
+      "env_file_usage": "allowed_local",
       "audit_logging": "all_mcp_calls",
       "jit_examples": [
         {
-          "env": "BRAVE_API_KEY_VAULT",
-          "value": "aws-secretsmanager://prod/brave-api-key"
+          "env": "BRAVE_API_KEY",
+          "value": "set via .env"
         },
         {
-          "env": "ETSY_API_KEY_VAULT",
-          "value": "aws-secretsmanager://prod/etsy-api-key"
+          "env": "ETSY_API_KEY",
+          "value": "set via .env"
         }
       ]
     },

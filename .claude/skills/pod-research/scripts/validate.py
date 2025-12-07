@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 """
+POD Niche Validation Script
+Version: 1.0.0
+Last Updated: 2025-12-07
+MCP Spec: 2.0
+Author: LWF Designs
+
 Deterministic niche validation logic for pod-research.
 No LLM calls; outputs JSON with confidence-driven GO/SKIP decision.
 """

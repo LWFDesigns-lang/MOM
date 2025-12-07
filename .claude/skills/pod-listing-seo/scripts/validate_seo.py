@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 """
+POD Listing SEO Validator
+Version: 1.0.0
+Last Updated: 2025-12-07
+MCP Spec: 2.0
+Author: LWF Designs
+
 SEO compliance checker for pod-listing-seo skill.
 """
 import argparse

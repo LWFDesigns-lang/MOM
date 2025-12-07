@@ -1,8 +1,7 @@
-version: "3.9"
 services:
   # Qdrant vector database (Tier 2 MCP requirement; localhost-only per SEP-986)
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.7.0
     container_name: qdrant-pod
     restart: unless-stopped
     ports:
@@ -24,7 +23,7 @@ services:
 
   # Neo4j graph database for relationship memory (localhost-only per architecture notes)
   neo4j:
-    image: neo4j:latest
+    image: neo4j:5.15.0
     container_name: neo4j-pod
     restart: unless-stopped
     ports:
@@ -53,8 +52,13 @@ networks:
     driver: bridge
     internal: true
     ipam:
+      driver: default
       config:
-        - subnet: "127.0.0.0/8"
+        - subnet: "172.28.0.0/16"
+          gateway: "172.28.0.1"
+    driver_opts:
+      com.docker.network.bridge.name: "pod_isolated"
+      com.docker.network.bridge.enable_icc: "false"
 
 volumes:
   qdrant-pod-storage:

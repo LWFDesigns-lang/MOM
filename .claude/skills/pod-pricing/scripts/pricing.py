@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 """
+POD Pricing Calculator
+Version: 1.0.0
+Last Updated: 2025-12-07
+MCP Spec: 2.0
+Author: LWF Designs
+
 Deterministic pricing calculator for pod-pricing skill.
 """
 import argparse

@@ -1,4 +1,6 @@
-# OAuth JIT Security Configuration (December 2025 MCP v2.0)
+# Local/Home Credential Guidance (December 2025)
+
+For single-user/home setups, use a gitignored `.env` file with local keys and restart services after changes. The sections below describe stricter OAuth JIT/AWS patterns; skip them if you stay local-only.
 
 ## 1. AWS Secrets Manager Foundations  
 - **Purpose:** Never write OAuth client secrets into `.env` or any source-controlled file (`SETUP_GUIDE_ARCHITECTURE.md:10-216`).  

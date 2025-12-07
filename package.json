@@ -1,0 +1,19 @@
+{
+  "name": "@lwf-designs/pod-automation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Claude Code 2.0 POD Business System automation",
+  "license": "MIT",
+  "scripts": {
+    "lint": "echo \"no lint configured\"",
+    "test": "echo \"no tests configured\""
+  },
+  "dependencies": {
+    "@anthropic-ai/mcp-server-sdk": "^1.0.0"
+  },
+  "optionalDependencies": {
+    "@anthropic-ai/mcp-server-brave-search": "^1.0.0",
+    "@anthropic-ai/mcp-server-filesystem": "^1.0.0",
+    "@anthropic-ai/mcp-server-playwright": "^1.0.0"
+  }
+}
