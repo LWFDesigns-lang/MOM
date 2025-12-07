@@ -1,172 +1,20 @@
 {
-  "_comment": "MCP v2.0 configuration referencing fact-check/POD_Master_Architecture_v3.0.md:239-396; direct stdio commands only.",
-  "_reference": "Source: fact-check/POD_Master_Architecture_v3.0.md:239-396 (Tier 1 + Tier 2 verified MCP list, OAuth requirements).",
   "mcpServers": {
     "filesystem": {
-      "command": "node",
-      "args": [
-        "node_modules/.bin/mcp-server-filesystem",
-        "."
-      ],
-      "stdio": "stdio",
-      "security": {
-        "tier": "tier_1_official",
-        "path_restrictions": [
-          "./.claude",
-          "./data",
-          "./logs"
-        ],
-        "read_allowed": true,
-        "write_allowed": true,
-        "spec_version": "2.0"
-      },
-      "notes": "Filesystem MCP limited to .claude/, data/, logs/ per SEP-1024.",
-      "tier": "Tier 1 - official"
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "d:/MOM"]
     },
     "brave-search": {
-      "command": "node",
-      "args": [
-        "node_modules/.bin/brave-search-mcp"
-      ],
-      "stdio": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/mcp-server-brave-search"],
       "env": {
         "BRAVE_API_KEY": "${BRAVE_API_KEY}"
-      },
-      "security": {
-        "spec_version": "2.0",
-        "tier": "tier_2_verified"
-      },
-      "notes": "Local/home setup: provide BRAVE_API_KEY via .env; rotation manual."
-    },
-    "perplexity-research": {
-      "command": "node",
-      "args": [
-        "node_modules/.bin/perplexity-mcp"
-      ],
-      "stdio": "stdio",
-      "env": {
-        "PERPLEXITY_API_KEY": "${PERPLEXITY_API_KEY}"
-      },
-      "security": {
-        "spec_version": "2.0",
-        "tier": "tier_2_verified"
-      },
-      "notes": "Local/home setup: provide PERPLEXITY_API_KEY via .env."
-    },
-    "playwright-browser": {
-      "command": "node",
-      "args": [
-        "node_modules/.bin/playwright-mcp"
-      ],
-      "stdio": "stdio",
-      "security": {
-        "sandbox": true,
-        "network_restrictions": "whitelist",
-        "sites_allowed": [
-          "etsy.com",
-          "trends.google.com",
-          "printful.com"
-        ],
-        "spec_version": "2.0",
-        "tier": "tier_2_verified"
-      },
-      "notes": "Playwright sandbox only allows documented domains; see SETUP_GUIDE_ARCHITECTURE.md:133-202."
-    },
-    "data-etsy": {
-      "command": "node",
-      "args": [
-        ".claude/mcp-servers/data-etsy/index.js"
-      ],
-      "stdio": "stdio",
-      "security": {
-        "tier": "tier_2_custom",
-        "spec_version": "2.0"
-      },
-      "notes": "Custom thin MCP for Etsy listing data retrieval (stubbed)."
-    },
-    "data-trends": {
-      "command": "node",
-      "args": [
-        ".claude/mcp-servers/data-trends/index.js"
-      ],
-      "stdio": "stdio",
-      "security": {
-        "tier": "tier_2_custom",
-        "spec_version": "2.0"
-      },
-      "notes": "Custom thin MCP for trends retrieval (stubbed)."
+      }
     },
     "logic-validator": {
       "command": "node",
-      "args": [
-        ".claude/mcp-servers/logic-validator/index.js"
-      ],
-      "stdio": "stdio",
-      "security": {
-        "tier": "tier_2_custom",
-        "spec_version": "2.0"
-      },
-      "notes": "Custom fat MCP for deterministic validation (stubbed)."
-    },
-    "etsy-api-integration": {
-      "command": "node",
-      "args": [
-        "node_modules/.bin/etsy-mcp"
-      ],
-      "stdio": "stdio",
-      "env": {
-        "ETSY_API_KEY": "${ETSY_API_KEY}",
-        "ETSY_API_SECRET": "${ETSY_API_SECRET}"
-      },
-      "security": {
-        "spec_version": "2.0",
-        "tier": "tier_2_verified"
-      },
-      "notes": "Local/home setup: provide Etsy credentials via .env."
-    },
-    "shopify-sync": {
-      "command": "node",
-      "args": [
-        "node_modules/.bin/shopify-mcp"
-      ],
-      "stdio": "stdio",
-      "env": {
-        "SHOPIFY_STORE": "${SHOPIFY_STORE}",
-        "SHOPIFY_TOKEN": "${SHOPIFY_TOKEN}"
-      },
-      "security": {
-        "spec_version": "2.0",
-        "tier": "tier_2_verified",
-        "future": true
-      },
-      "notes": "Prepared for future Shopify sync; supply values via .env when used."
+      "args": [".claude/mcp-servers/logic-validator/index.js"],
+      "cwd": "d:/MOM"
     }
-  },
-  "security_compliance": {
-    "mcp_spec_version": "2.0",
-    "seps_implemented": [
-      "SEP-1024: Client security requirements",
-      "SEP-835: OAuth default scopes and rotation",
-      "SEP-986: Tool naming + direct stdio",
-      "SEP-1319: Decoupled payload handling"
-    ],
-    "credential_management": {
-      "pattern": "local_env",
-      "token_rotation": "manual_restart",
-      "oauth_only": false,
-      "env_file_usage": "allowed_local",
-      "audit_logging": "all_mcp_calls",
-      "jit_examples": [
-        {
-          "env": "BRAVE_API_KEY",
-          "value": "set via .env"
-        },
-        {
-          "env": "ETSY_API_KEY",
-          "value": "set via .env"
-        }
-      ]
-    },
-    "notes": "AWS Secrets Manager + Astrix security audit demanded zero static keys, hourly rotation, and audit trails."
   }
 }
