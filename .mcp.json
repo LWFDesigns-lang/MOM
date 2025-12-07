@@ -1,0 +1,232 @@
+{
+  "_comment": "MCP v2.0 configuration referencing fact-check/POD_Master_Architecture_v3.0.md:239-396; direct stdio commands only.",
+  "_reference": "Source: fact-check/POD_Master_Architecture_v3.0.md:239-396 (Tier 1 + Tier 2 verified MCP list, OAuth requirements).",
+  "mcpServers": {
+    "filesystem": {
+      "command": "node",
+      "args": [
+        "node_modules/.bin/mcp-server-filesystem",
+        "."
+      ],
+      "stdio": "stdio",
+      "security": {
+        "tier": "tier_1_official",
+        "path_restrictions": [
+          "./.claude",
+          "./data",
+          "./logs"
+        ],
+        "read_allowed": true,
+        "write_allowed": true,
+        "spec_version": "2.0"
+      },
+      "notes": "Filesystem MCP limited to .claude/, data/, logs/ per SEP-1024.",
+      "tier": "Tier 1 - official"
+    },
+    "brave-search": {
+      "command": "node",
+      "args": [
+        "node_modules/.bin/brave-search-mcp"
+      ],
+      "stdio": "stdio",
+      "env": {
+        "BRAVE_API_KEY_VAULT": "aws-secretsmanager://prod/brave-api-key",
+        "BRAVE_OAUTH_TTL": "3600",
+        "BRAVE_TOKEN_ENDPOINT": "https://api.search.brave.com/oauth/token"
+      },
+      "security": {
+        "credential_retrieval": "jit",
+        "credential_type": "oauth",
+        "token_rotation_enabled": true,
+        "token_ttl_seconds": 3600,
+        "scope": [
+          "search.read"
+        ],
+        "spec_version": "2.0",
+        "tier": "tier_2_verified"
+      },
+      "notes": "OAuth JIT pattern with AWS Secrets Manager and 60-minute rotation (SEP-835, SEP-1319)."
+    },
+    "perplexity-research": {
+      "command": "node",
+      "args": [
+        "node_modules/.bin/perplexity-mcp"
+      ],
+      "stdio": "stdio",
+      "env": {
+        "PERPLEXITY_API_KEY_VAULT": "aws-secretsmanager://prod/perplexity-api-key",
+        "PERPLEXITY_OAUTH_TTL": "3600",
+        "PERPLEXITY_TOKEN_ENDPOINT": "https://www.perplexity.ai/api/oauth/token"
+      },
+      "security": {
+        "credential_retrieval": "jit",
+        "credential_type": "oauth",
+        "token_rotation_enabled": true,
+        "token_ttl_seconds": 3600,
+        "scope": [
+          "research.read"
+        ],
+        "spec_version": "2.0",
+        "tier": "tier_2_verified"
+      },
+      "notes": "Perplexity used for niche grounding only; no static keys."
+    },
+    "playwright-browser": {
+      "command": "node",
+      "args": [
+        "node_modules/.bin/playwright-mcp"
+      ],
+      "stdio": "stdio",
+      "security": {
+        "sandbox": true,
+        "network_restrictions": "whitelist",
+        "sites_allowed": [
+          "etsy.com",
+          "trends.google.com",
+          "printful.com"
+        ],
+        "spec_version": "2.0",
+        "tier": "tier_2_verified"
+      },
+      "notes": "Playwright sandbox only allows documented domains; see SETUP_GUIDE_ARCHITECTURE.md:133-202."
+    },
+    "qdrant-vector-memory": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--name",
+        "qdrant-pod",
+        "-p",
+        "127.0.0.1:6333:6333",
+        "-v",
+        "qdrant-pod-storage:/qdrant/storage",
+        "-e",
+        "QDRANT_API_KEY=${QDRANT_API_KEY}",
+        "-e",
+        "QDRANT_READONLY_KEY=${QDRANT_READONLY_KEY}",
+        "qdrant/qdrant:latest"
+      ],
+      "security": {
+        "network": "localhost_only",
+        "api_key_required": true,
+        "storage_persistent": true,
+        "spec_version": "2.0",
+        "tier": "tier_2_verified",
+        "localhost_binding": "127.0.0.1"
+      },
+      "notes": "Docker service bound to 127.0.0.1 only (SEP-986)."
+    },
+    "neo4j-relationship-graph": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--name",
+        "neo4j-pod",
+        "-p",
+        "127.0.0.1:7687:7687",
+        "-v",
+        "neo4j-pod-data:/var/lib/neo4j/data",
+        "-e",
+        "NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}",
+        "neo4j:latest"
+      ],
+      "security": {
+        "network": "localhost_only",
+        "password_required": true,
+        "storage_persistent": true,
+        "spec_version": "2.0",
+        "tier": "tier_2_verified",
+        "localhost_binding": "127.0.0.1"
+      },
+      "notes": "Graph database restricted to localhost (Docker) to satisfy air-gap compliance."
+    },
+    "etsy-api-integration": {
+      "command": "node",
+      "args": [
+        "node_modules/.bin/etsy-mcp"
+      ],
+      "stdio": "stdio",
+      "env": {
+        "ETSY_API_KEY_VAULT": "aws-secretsmanager://prod/etsy-api-key",
+        "ETSY_API_SECRET_VAULT": "aws-secretsmanager://prod/etsy-api-secret",
+        "ETSY_OAUTH_TTL": "3600",
+        "ETSY_TOKEN_ENDPOINT": "https://openapi.etsy.com/oauth/token"
+      },
+      "security": {
+        "credential_retrieval": "jit",
+        "credential_type": "oauth",
+        "token_rotation_enabled": true,
+        "token_ttl_seconds": 3600,
+        "scope": [
+          "listings.write",
+          "analytics.read"
+        ],
+        "spec_version": "2.0",
+        "tier": "tier_2_verified"
+      },
+      "notes": "Etsy integration uses OAuth only; env files are for placeholders."
+    },
+    "shopify-sync": {
+      "command": "node",
+      "args": [
+        "node_modules/.bin/shopify-mcp"
+      ],
+      "stdio": "stdio",
+      "env": {
+        "SHOPIFY_STORE_VAULT": "aws-secretsmanager://prod/shopify-store",
+        "SHOPIFY_TOKEN_VAULT": "aws-secretsmanager://prod/shopify-token",
+        "SHOPIFY_OAUTH_TTL": "3600",
+        "SHOPIFY_TOKEN_ENDPOINT": "https://{store}.myshopify.com/admin/oauth/access_token"
+      },
+      "security": {
+        "credential_retrieval": "jit",
+        "credential_type": "oauth",
+        "token_rotation_enabled": true,
+        "token_ttl_seconds": 3600,
+        "scope": [
+          "write_products",
+          "read_analytics"
+        ],
+        "spec_version": "2.0",
+        "tier": "tier_2_verified",
+        "future": true
+      },
+      "notes": "Prepared for future Shopify sync; vault values supply runtime credentials."
+    }
+  },
+  "security_compliance": {
+    "mcp_spec_version": "2.0",
+    "seps_implemented": [
+      "SEP-1024: Client security requirements",
+      "SEP-835: OAuth default scopes and rotation",
+      "SEP-986: Tool naming + direct stdio",
+      "SEP-1319: Decoupled payload handling"
+    ],
+    "credential_management": {
+      "pattern": "aws_secretsmanager_jit",
+      "token_rotation": "automatic_60min",
+      "oauth_only": true,
+      "env_file_usage": "forbidden_for_real_values",
+      "audit_logging": "all_mcp_calls",
+      "jit_examples": [
+        {
+          "env": "BRAVE_API_KEY_VAULT",
+          "value": "aws-secretsmanager://prod/brave-api-key"
+        },
+        {
+          "env": "ETSY_API_KEY_VAULT",
+          "value": "aws-secretsmanager://prod/etsy-api-key"
+        }
+      ]
+    },
+    "docker_localhost_services": [
+      "qdrant-vector-memory",
+      "neo4j-relationship-graph"
+    ],
+    "notes": "AWS Secrets Manager + Astrix security audit demanded zero static keys, hourly rotation, and audit trails."
+  }
+}

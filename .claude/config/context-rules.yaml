@@ -1,0 +1,55 @@
+context_window:
+  base_tokens: 200000
+  extended_tokens: 1000000
+  buffer_tokens: 35000
+  reserved_overhead:
+    claude_md: 5000
+    memories: 5000
+
+microcompact:
+  auto_trigger: 180000
+  min_savings_percent: 40
+  verification_command: "/context"
+  log_location: ".claude/data/logs/context.jsonl"
+
+checkpoints:
+  auto_frequency_tokens: 50000
+  max_stored: 10
+  retention_days: 7
+  metadata_required: ["label","tokens","created_at"]
+  retention_policy:
+    keep_successful_runs: true
+    delete_oldest_when_full: true
+
+session_reset_triggers:
+  - token_count: 180000
+  - skill_chains: 30
+  - quality_degradation: true
+  - checkpoint_count: 10
+
+workflow_patterns:
+  single_validation:
+    budget: 5000
+    compact_after: false
+    checkpoint_after: false
+  batch_validation:
+    budget: 15000
+    compact_after: true
+    checkpoint_after: true
+    compact_target: 160000
+  full_pipeline:
+    budget: 40000
+    checkpoint_stages: true
+    microcompact_after: true
+
+token_budget_allocations:
+  claude_md_plus_memories: 5000
+  skill_definitions: 10000
+  active_conversation: 150000
+  response_buffer: 35000
+
+context_efficiency_guidelines:
+  - enforce_literal_checkpoints_per_skill_chain_boundary
+  - avoid_inline_data_when referenced_files_exist
+  - favour concise JSON structures for MCP responses
+  - schedule microcompact_verification after auto-trigger

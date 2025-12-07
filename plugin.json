@@ -1,0 +1,91 @@
+{
+  "name": "pod-automation",
+  "version": "1.0.0",
+  "description": "95% automated POD niche research → design → listing pipeline for LWF Designs and Touge Technicians.",
+  "author": "C.A.R.S. (LWF + Touge)",
+  "default_model": "claude-pro-sonnet-4.5",
+  "mcp_spec_version": "2.0",
+  "capabilities": {
+    "skills": true,
+    "skill_chains": true,
+    "hooks": true,
+    "memory": true,
+    "queues": true
+  },
+  "skills": {
+    "pod-research": {
+      "path": ".claude/skills/pod-research/",
+      "description": "Deterministic GO/SKIP niche validation with Etsy + Trends thresholds.",
+      "depends_on": ["brave-search", "perplexity-research"],
+      "token_budget": "1.5K-2.5K",
+      "confidence_threshold": 0.75
+    },
+    "pod-design-review": {
+      "path": ".claude/skills/pod-design-review/",
+      "description": "LLM-generated design concepts guided by brand voice memories.",
+      "depends_on": [],
+      "token_budget": "5K-8K",
+      "prerequisites": ["pod-research (GO decision)"]
+    },
+    "pod-pricing": {
+      "path": ".claude/skills/pod-pricing/",
+      "description": "Deterministic pricing calculator respecting Etsy fees and margin guardrails.",
+      "depends_on": [],
+      "token_budget": "100-150 tokens"
+    },
+    "pod-listing-seo": {
+      "path": ".claude/skills/pod-listing-seo/",
+      "description": "Generate SEO titles/tags/descriptions with deterministic validation.",
+      "depends_on": ["pod-design-review", "pod-pricing"],
+      "token_budget": "4K-6K"
+    },
+    "memory-manager": {
+      "path": ".claude/skills/memory-manager/",
+      "description": "Persist GO decisions while archiving SKIP reasoning.",
+      "depends_on": [],
+      "token_budget": "0.5K-0.9K"
+    }
+  },
+  "skill_chains": {
+    "full-pipeline": {
+      "path": ".claude/chains/full_pipeline.yaml",
+      "token_budget": "8K-12K",
+      "description": "Research → Design → Pricing → Listing across 8-12K tokens."
+    },
+    "research-only": {
+      "path": ".claude/chains/research_only.yaml",
+      "token_budget": "2K-3K",
+      "description": "Fast niche validation pipeline."
+    }
+  },
+  "mcp_servers": {
+    "config": ".mcp.json",
+    "security": "oauth_jit_retrieval"
+  },
+  "hooks": {
+    "config": ".claude/hooks/post-skill-complete.json",
+    "escalation_threshold": 0.75
+  },
+  "queues": {
+    "review": ".claude/queues/review_queue.jsonl"
+  },
+  "memory": {
+    "brand_voice": ".claude/memories/",
+    "validated_data": ".claude/memories/validated_niches.json",
+    "skipped_archive": ".claude/data/skipped_niches.json"
+  },
+  "context_management": {
+    "token_window": 200000,
+    "microcompact": "auto at 180K",
+    "checkpoints": true,
+    "sessions": "Claude Code single-session with optional checkpoints"
+  },
+  "automation": {
+    "decision_framework": "Deterministic-first (Python scripts) → creative LLM for listings/design.",
+    "hooks": [
+      "save-go-decisions",
+      "archive-skip-decisions",
+      "escalate-low-confidence"
+    ]
+  }
+}

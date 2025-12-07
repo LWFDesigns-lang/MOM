@@ -1,0 +1,17 @@
+name: full-pipeline-chain
+description: Research → Design → Pricing → Listing (8-12K tokens)
+steps:
+  - skill: pod-research
+    input_from: user
+    output_to: memory:niche_result
+  - skill: pod-design-review
+    trigger: "if memory:niche_result.decision == 'GO'"
+    input_from: memory:niche_result
+    output_to: memory:design_result
+  - skill: pod-pricing
+    input_from: user
+    output_to: memory:price_result
+  - skill: pod-listing-seo
+    input_from: [memory:design_result, memory:price_result]
+    output_to: memory:listing_result
+summary: "Niche → Design → Price → Live Listing"

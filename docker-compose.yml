@@ -1,0 +1,71 @@
+version: "3.9"
+services:
+  # Qdrant vector database (Tier 2 MCP requirement; localhost-only per SEP-986)
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant-pod
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6333:6333"  # Host binding enforces localhost-only access
+    volumes:
+      - qdrant-pod-storage:/qdrant/storage  # Persistent storage across restarts
+    environment:
+      QDRANT_API_KEY: "${QDRANT_API_KEY}"  # Injected via AWS Secrets Manager at runtime
+      QDRANT_READ_ONLY_API_KEY: "${QDRANT_READONLY_KEY}"
+    deploy:
+      replicas: 1
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://127.0.0.1:6333/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - localhost-only
+
+  # Neo4j graph database for relationship memory (localhost-only per architecture notes)
+  neo4j:
+    image: neo4j:latest
+    container_name: neo4j-pod
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:7687:7687"
+      - "127.0.0.1:7474:7474"  # HTTP port for optional browser access; still localhost-bound
+    volumes:
+      - neo4j-pod-data:/var/lib/neo4j/data
+      - neo4j-log:/logs
+    environment:
+      NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD}"  # Password kept in AWS Secrets Manager
+      NEO4J_dbms_memory_pagecache_size: "1G"
+      NEO4J_dbms_memory_heap_initial__size: "1G"
+      NEO4J_dbms_memory_heap_max__size: "2G"
+    deploy:
+      replicas: 1
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://127.0.0.1:7474 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - localhost-only
+
+networks:
+  localhost-only:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: "127.0.0.0/8"
+
+volumes:
+  qdrant-pod-storage:
+    driver: local
+    labels:
+      purpose: "Qdrant persistent vector storage (POD automation)"
+  neo4j-pod-data:
+    driver: local
+    labels:
+      purpose: "Neo4j database files (relationship graph)"
+  neo4j-log:
+    driver: local
+    labels:
+      purpose: "Neo4j log persistence"

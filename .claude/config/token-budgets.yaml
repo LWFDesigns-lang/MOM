@@ -1,0 +1,45 @@
+workflows:
+  single_niche_validation:
+    budget: 5000
+    warning: 4000
+    breakdown:
+      data_etsy_call: 120
+      data_trends_call: 80
+      logic_validator_call: 200
+      skill_orchestration: 500
+      llm_interpretation: 500
+      buffer: 3600
+  batch_validation_5:
+    budget: 15000
+    warning: 12000
+    use_subagents: true
+    per_item_budget: 2500
+  design_ideation:
+    budget: 8000
+    warning: 6500
+    breakdown:
+      brand_memory_load: 500
+      concept_generation: 4000
+      formatting: 500
+      buffer: 3000
+  listing_creation:
+    budget: 10000
+    warning: 8000
+    breakdown:
+      design_input: 500
+      seo_generation: 3000
+      logic_validator_seo: 200
+      formatting: 500
+      buffer: 5800
+  full_pipeline:
+    budget: 40000
+    warning: 30000
+    stages:
+      - validation: 5000
+      - design: 8000
+      - listing: 10000
+      - review: 5000
+      - buffer: 12000
+reset_triggers:
+  daily_midnight: true
+  manual_command: "claude tokens reset"

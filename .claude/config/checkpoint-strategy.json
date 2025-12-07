@@ -1,0 +1,32 @@
+{
+  "triggers": {
+    "before_batch": true,
+    "after_go_decision": true,
+    "token_interval": 50000,
+    "skill_chain_start": true,
+    "user_request": true
+  },
+  "retention": {
+    "max_checkpoints": 10,
+    "keep_days": 7,
+    "keep_successful_runs": true
+  },
+  "naming": {
+    "pattern": "{workflow}_{timestamp}_{description}",
+    "examples": [
+      "validation_20251207_143022_batch5",
+      "pipeline_20251207_150045_niche_plants"
+    ]
+  },
+  "restoration": {
+    "priority": [
+      "latest_successful",
+      "last_batch",
+      "user_requested"
+    ]
+  },
+  "cleanup": {
+    "schedule": "daily",
+    "auto_prune": true
+  }
+}

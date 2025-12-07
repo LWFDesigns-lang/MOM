@@ -1,0 +1,7 @@
+name: research-only-chain
+description: Fast validation pipeline (2-3K tokens)
+steps:
+  - skill: pod-research
+    input_from: user
+    output_to: memory:niche_result
+summary: "Rapid niche validation"

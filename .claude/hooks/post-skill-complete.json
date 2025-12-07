@@ -1,0 +1,34 @@
+{
+  "hooks": [
+    {
+      "name": "save-go-decisions",
+      "trigger": "skill_result",
+      "condition": "skill_name == 'pod-research' && result.decision == 'GO'",
+      "action": {
+        "type": "append_json",
+        "file": ".claude/memories/validated_niches.json",
+        "content": "$result"
+      }
+    },
+    {
+      "name": "escalate-low-confidence",
+      "trigger": "skill_result",
+      "condition": "skill_name == 'pod-research' && result.confidence < 0.75",
+      "action": {
+        "type": "append_jsonl",
+        "file": ".claude/queues/review_queue.jsonl",
+        "content": "$result"
+      }
+    },
+    {
+      "name": "archive-skip-decisions",
+      "trigger": "skill_result",
+      "condition": "skill_name == 'pod-research' && result.decision == 'SKIP'",
+      "action": {
+        "type": "append_json",
+        "file": ".claude/data/skipped_niches.json",
+        "content": "$result"
+      }
+    }
+  ]
+}

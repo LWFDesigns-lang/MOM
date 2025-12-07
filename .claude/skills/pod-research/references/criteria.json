@@ -1,0 +1,66 @@
+{
+  "etsy": {
+    "green_light": 50000,
+    "red_flag": 100000,
+    "ideal_min": 5000,
+    "ideal_max": 30000
+  },
+  "google_trends": {
+    "minimum": 40,
+    "excellent": 60
+  },
+  "brands": {
+    "LWF": [
+      "plant",
+      "sustainable",
+      "eco",
+      "wellness",
+      "mindful",
+      "organic",
+      "nature",
+      "minimalist",
+      "lifestyle",
+      "health",
+      "yoga",
+      "meditation",
+      "botanical",
+      "green living"
+    ],
+    "Touge": [
+      "jdm",
+      "drift",
+      "touge",
+      "ae86",
+      "s13",
+      "s14",
+      "ek9",
+      "dc2",
+      "rx7",
+      "gt86",
+      "brz",
+      "miata",
+      "mx5",
+      "silvia",
+      "skyline",
+      "supra",
+      "nsx",
+      "integra",
+      "car",
+      "auto",
+      "racing",
+      "track"
+    ]
+  },
+  "sub_niches": [
+    "beginner",
+    "advanced",
+    "eco-friendly",
+    "affordable",
+    "luxury",
+    "DIY"
+  ],
+  "token_budget": {
+    "min": 1500,
+    "max": 2500
+  }
+}

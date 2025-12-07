@@ -1,0 +1,91 @@
+{
+  "fallback_chains": {
+    "get_etsy_count": {
+      "primary": {
+        "mcp": "data-etsy",
+        "tool": "etsy_get_listing_count",
+        "timeout_ms": 5000,
+        "confidence_penalty": 0.0
+      },
+      "secondary": {
+        "mcp": "playwright",
+        "action": "scrape_etsy_search",
+        "timeout_ms": 15000,
+        "confidence_penalty": 0.05
+      },
+      "tertiary": {
+        "type": "cache",
+        "path": ".claude/data/cache/etsy_counts.json",
+        "max_age_hours": 24,
+        "confidence_penalty": 0.10
+      },
+      "quaternary": {
+        "type": "heuristic",
+        "method": "estimate_from_keywords",
+        "confidence_penalty": 0.20
+      },
+      "final": {
+        "type": "escalate",
+        "queue": ".claude/queues/manual_lookup.jsonl",
+        "message": "Unable to obtain Etsy count for {{niche}}. Manual lookup requested."
+      }
+    },
+    "get_trend_score": {
+      "primary": {
+        "mcp": "data-trends",
+        "tool": "trends_get_12mo_stability",
+        "timeout_ms": 5000
+      },
+      "secondary": {
+        "type": "cache",
+        "path": ".claude/data/cache/trend_scores.json",
+        "max_age_hours": 168,
+        "confidence_penalty": 0.15
+      },
+      "tertiary": {
+        "type": "heuristic",
+        "method": "estimate_from_seasonality",
+        "confidence_penalty": 0.15
+      },
+      "final": {
+        "type": "default",
+        "value": 50,
+        "confidence_penalty": 0.30,
+        "warning": "Using fallback trend score (50). Confidence is reduced."
+      }
+    },
+    "validate_niche": {
+      "primary": {
+        "mcp": "logic-validator",
+        "tool": "validate_niche",
+        "timeout_ms": 3000
+      },
+      "secondary": {
+        "type": "local_script",
+        "script": ".claude/skills/pod-research/scripts/validate.py",
+        "timeout_ms": 4000
+      },
+      "tertiary": {
+        "type": "cache",
+        "path": ".claude/data/cache/validation_results.json",
+        "max_age_hours": 48
+      },
+      "quaternary": {
+        "type": "heuristic",
+        "method": "estimate_from_keywords",
+        "confidence_penalty": 0.25
+      },
+      "final": {
+        "type": "escalate",
+        "queue": ".claude/queues/manual_validation.jsonl",
+        "message": "Validation services unavailable for {{niche}}. Manual rule check required."
+      }
+    }
+  },
+  "global_settings": {
+    "max_retries": 2,
+    "retry_delay_ms": 1000,
+    "log_fallbacks": true,
+    "fallback_log_path": ".claude/data/logs/fallbacks.jsonl"
+  }
+}
